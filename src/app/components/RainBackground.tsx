@@ -20,7 +20,7 @@ export default function RainBackground() {
     let animId: number;
 
     const drops: Drop[] = [];
-    const DROP_COUNT = 180;
+    const DROP_COUNT = 420;
 
     function resize() {
       canvas!.width = window.innerWidth;
@@ -30,13 +30,28 @@ export default function RainBackground() {
     window.addEventListener('resize', resize);
 
     for (let i = 0; i < DROP_COUNT; i++) {
+      let x: number;
+      const edgeBias = Math.random();
+      if (edgeBias < 0.3) {
+        x = Math.random() * window.innerWidth * 0.20;
+      } else if (edgeBias < 0.6) {
+        x = window.innerWidth * 0.80 + Math.random() * window.innerWidth * 0.20;
+      } else {
+        x = Math.random() * window.innerWidth;
+      }
+
+      const isEdge = x < window.innerWidth * 0.20 || x > window.innerWidth * 0.80;
+      const opacity = isEdge
+        ? Math.random() * 0.18 + 0.1
+        : Math.random() * 0.08 + 0.02;
+
       drops.push({
-        x: Math.random() * window.innerWidth,
+        x,
         y: Math.random() * window.innerHeight,
-        length: Math.random() * 25 + 10,
-        speed: Math.random() * 6 + 8,
-        opacity: Math.random() * 0.12 + 0.04,
-        width: Math.random() < 0.3 ? 1.5 : 1,
+        length: Math.random() * 20 + 12,
+        speed: Math.random() * 7 + 9,
+        opacity,
+        width: isEdge ? (Math.random() < 0.4 ? 2.5 : 1.8) : 1.5,
       });
     }
 
@@ -46,19 +61,27 @@ export default function RainBackground() {
       drops.forEach((drop) => {
         ctx.beginPath();
         ctx.moveTo(drop.x, drop.y);
-        // Slight diagonal angle like real rain
-        ctx.lineTo(drop.x + drop.length * 0.15, drop.y + drop.length);
+        ctx.lineTo(drop.x, drop.y + drop.length);
         ctx.strokeStyle = `rgba(0, 0, 0, ${drop.opacity})`;
         ctx.lineWidth = drop.width;
         ctx.lineCap = 'round';
         ctx.stroke();
 
         drop.y += drop.speed;
-        drop.x += drop.speed * 0.15;
 
         if (drop.y > canvas!.height) {
           drop.y = -drop.length;
-          drop.x = Math.random() * canvas!.width;
+          const eb = Math.random();
+          if (eb < 0.3) {
+            drop.x = Math.random() * canvas!.width * 0.20;
+          } else if (eb < 0.6) {
+            drop.x = canvas!.width * 0.80 + Math.random() * canvas!.width * 0.20;
+          } else {
+            drop.x = Math.random() * canvas!.width;
+          }
+          const isEdge = drop.x < canvas!.width * 0.20 || drop.x > canvas!.width * 0.80;
+          drop.opacity = isEdge ? Math.random() * 0.18 + 0.1 : Math.random() * 0.08 + 0.02;
+          drop.width = isEdge ? (Math.random() < 0.4 ? 2.5 : 1.8) : 1.5;
         }
       });
 

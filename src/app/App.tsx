@@ -42,6 +42,9 @@ export default function App() {
     'Eaton': 'https://www.eaton.com/us/en-us/company/news-insights/what-matters.html',
     'Pivyr': 'https://www.pivyr.com/',
     'MeaVana': 'https://www.meavana.com',
+    'Rishfits': 'https://rishfits.ptflow.io/',
+    'Soar Bars': 'https://soarbars.com/',
+    'Praxigen': 'https://praxigen.dev/',
   };
 
   const personalContent: Record<string, { image?: string; description?: string }> = {
@@ -189,11 +192,11 @@ export default function App() {
       )}
 
       <div
-        className={`relative z-10 w-full max-w-4xl px-8 py-8 transition-all duration-300 ${(hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.author ? 'mr-[420px]' : ''
+        className={`relative z-10 w-full max-w-4xl px-8 pt-4 pb-8 transition-all duration-300 ${(hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.author ? 'mr-[420px]' : ''
           } ${isEldenRing ? 'text-white' : ''}`}
       >
         {/* Header */}
-        <div className="mb-12 flex items-center justify-between">
+        <div className="mb-5 flex items-center justify-between">
           <div>
             <h1 className="text-5xl mb-2">Ohm Kumblekere</h1>
             <p className={`text-lg ${isEldenRing ? 'text-gray-200' : darkMode ? 'text-gray-400' : 'text-gray-600'} transition-colors duration-700`}>Product · Engineering · Creation · Try hovering or clicking your cursor over underlined words</p>
@@ -229,7 +232,31 @@ export default function App() {
               >
                 MeaVana
               </span>
-              , Rishfits LC, Soar Bars, and Praxigen) where I've worked from software, to growth, to predominantly product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
+              ,{' '}
+              <span
+                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Rishfits' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
+                onMouseEnter={() => handleCompanyHover('Rishfits')}
+                onMouseLeave={() => handleCompanyHover(null)}
+              >
+                Rishfits
+              </span>
+              ,{' '}
+              <span
+                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Soar Bars' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
+                onMouseEnter={() => handleCompanyHover('Soar Bars')}
+                onMouseLeave={() => handleCompanyHover(null)}
+              >
+                Soar Bars
+              </span>
+              , and{' '}
+              <span
+                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Praxigen' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
+                onMouseEnter={() => handleCompanyHover('Praxigen')}
+                onMouseLeave={() => handleCompanyHover(null)}
+              >
+                Praxigen
+              </span>
+              ) where I've worked from software, to growth, to predominantly product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Eaton')}
@@ -339,7 +366,9 @@ export default function App() {
         </div>
 
         {/* Social Links */}
-        <div className="mt-12 flex items-center gap-6">
+        <div className="mt-6 flex flex-col gap-2">
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: June 23rd, 2026</p>
+        <div className="flex items-center gap-6">
           <a
             href="https://github.com/Omnom90?tab=repositories"
             target="_blank"
@@ -370,7 +399,7 @@ export default function App() {
             aria-label="Medium"
           >
             <svg className="size-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z" />
+              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" />
             </svg>
           </a>
           <a
@@ -393,6 +422,7 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </a>
+        </div>
         </div>
       </div>
 
