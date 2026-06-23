@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import StormBackground from './components/StormBackground';
+import RainBackground from './components/RainBackground';
 import eldenRingImg from '../assets/eldenring.jpg';
 import charlesImg from '../assets/charles.jpg';
 import cadeImg from '../assets/cade.jpg';
@@ -38,7 +40,7 @@ export default function App() {
 
   const companyUrls: Record<string, string> = {
     'Eaton': 'https://www.eaton.com/us/en-us/company/news-insights/what-matters.html',
-    'Pivyr': 'https://www.pivyr.com',
+    'Pivyr': 'https://www.pivyr.com/',
     'MeaVana': 'https://www.meavana.com',
   };
 
@@ -86,11 +88,11 @@ export default function App() {
   const sportsContent: Record<string, { image: string; description: string }> = {
     'Charles "Do Bronx" Oliveira': {
       image: charlesImg,
-      description: "One of the first UFC fighters I ever watched. Had one of the greatest title runs in the sport's history, winning 11 fights in a row, and beating all-time greats. Is considered a top 3 lightweight OAT, and the reason I fell in love with the sport."
+      description: "The Champion Has A Name! Charles vs Gaethji was the first ufc fight I wathced. His upbringing, story, and what he fights for is truly inspiring. He came from being known as a quitter to a top 3 leightweight fighter OAT. He showed me that losing doesn't matter, it's what you do after you lose that matters"
     },
     'Cade': {
       image: cadeImg,
-      description: "THE PISTONS ARE SO BACK. I am born and raised in Michigan, but wasn't really alive for the bad boys pistons, and since I've been watching basketball, the pistons have been possibly the worst team. Thankfully, Cade Cunningham, an MVP candidate this season, and the most ethical hooper on the planet arrived. The pistons have the best record in the NBA and are one of the favorites to win the championship this season."
+      description: "Even though the playoffs didn't go as planned, we were right there. I am born and raised in Michigan, but wasn't  alive for the bad boys pistons, and since I've been watching basketball, the pistons have been possibly the worst team. I'm hopefuly we have a good offseason and come back better next season."
     }
   };
 
@@ -170,7 +172,11 @@ export default function App() {
   const isEldenRing = hoverState.personal === 'Elden Ring';
 
   return (
-    <div className={`relative size-full overflow-hidden flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    <div className={`relative min-h-screen w-full overflow-hidden flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#11111f] text-white' : 'bg-white text-black'}`}>
+      {/* Storm background in dark mode */}
+      {darkMode && <StormBackground />}
+      {/* Rain texture in light mode */}
+      {!darkMode && <RainBackground />}
       {/* Background overlay when hovering personal items */}
       {hoverState.personal && personalContent[hoverState.personal] && personalContent[hoverState.personal].image && (
         <div className="absolute inset-0 z-0 transition-opacity duration-700">
@@ -205,7 +211,7 @@ export default function App() {
         <div className="space-y-6">
           {/* Experience Section */}
           <section>
-            <h2 className="text-2xl mb-3 border-b border-red-500 pb-2">Experience</h2>
+            <h2 className="text-2xl mb-3 border-b border-current pb-2">Experience</h2>
             <p className="text-base leading-relaxed">
               I have worked at multiple startups (
               <span
@@ -223,7 +229,7 @@ export default function App() {
               >
                 MeaVana
               </span>
-              ) as a product manager or product engineering intern where I have shipped multiple key features but also learned how to interview users at a high level. Additionally, I am an incoming tech sales intern @
+              , Rishfits LC, Soar Bars, and Praxigen) where I've worked from software, to growth, to produminately product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Eaton')}
@@ -232,12 +238,18 @@ export default function App() {
               >
                 Eaton
               </span>{' '}
-              where I'll be building sales, technical and leadership skills, while being the only intern at my location (wish me luck).
+              where I'm lead GTM on a new product line, shipped a new company website, and automating a sales quote form.
             </p>
             <p className="text-base leading-relaxed mt-4">
-              In my time in college, I have taken a multitude of rigorous courses that have taught me how to build projects (not really, I mainly taught myself). Some of those include an{' '}
+              I learned most of my technical skills through coursework and projects. I have experience in DSA, OOP, ML, computer architecture, and web systems. I'm currently enrolled in computer vision, and applied AI-agents (how SWE works with AI). 
+              <p className="text-base leading-relaxed mt-4"></p>
+              <p>I'm also currently working on some projects. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form feedback enginge using Google's mediapipe and LLM integration (it's done, just want better functionality) </p>
+              <p className="text-base leading-relaxed mt-4"></p>
+
+              <p>In currently development of a productivity/fitness app named: Meridian. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
+              {/* Some of those include an{' '}
               <a
-                href="https://github.com/repos?q=owner%3A%40me"
+                href="https://github.com/Omnom90?tab=repositories"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-red-500 transition-colors underline"
@@ -246,14 +258,14 @@ export default function App() {
               </a>{' '}
               that finds credible articles for discovering sources that align with papers I wish to write. I've also developed a{' '}
               <a
-                href="https://github.com/repos?q=owner%3A%40me"
+                href="https://github.com/Omnom90?tab=repositories"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-red-500 transition-colors underline"
               >
                 music recommendation engine
               </a>{' '}
-              using the Spotify API and K-means clustering to prioritize certain audio features and find similar music with improved accuracy.
+              using the Spotify API and K-means clustering to prioritize certain audio features and find similar music with improved accuracy. */}
             </p>
             <p className="text-base leading-relaxed mt-4">
               I'm a{' '}
@@ -274,13 +286,14 @@ export default function App() {
               >
                 content creator
               </span>{' '}
-              (almost 500 followers) with about a million views based around making relatable fitness content and showcasing my musical talent. Mainly trying to inspire and motivate them to always strive for greatness.
+              with around 4k follower and over 4 million views. I make videos around fitness, music, and promotional deals. I want to inspire those to share their talents with the world and motivate them to strive for greatness (hit me up for any brand deals).
+  
             </p>
           </section>
 
           {/* Myself Section */}
           <section>
-            <h2 className="text-2xl mb-3 border-b border-red-500 pb-2">Myself</h2>
+            <h2 className="text-2xl mb-3 border-b border-current pb-2">Myself</h2>
             <p className="text-base leading-relaxed">
               In my free time, I have beaten the game{' '}
               <span
@@ -290,7 +303,7 @@ export default function App() {
               >
                 Elden Ring
               </span>{' '}
-              with 100% completion, love to workout and exercise (315 bench coming soon), have hit the highest rank on Merge Tactics, and am an{' '}
+              (100% completion), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with AI pictures, and am an{' '}
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.author ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleAuthorHover(true)}
@@ -298,7 +311,7 @@ export default function App() {
               >
                 "author"
               </span>{' '}
-              who loves writing about fitness, products, and philosophy.
+              that loves writing about fitness and philosophy.
             </p>
             <p className="text-base leading-relaxed mt-4">
               Also a huge sports fan especially with UFC (
@@ -320,7 +333,7 @@ export default function App() {
               for MVP).
             </p>
             <p className="text-base leading-relaxed mt-4">
-              I go to school at the University of Michigan pursuing a bachelor's in Computer Science, but also love to try anything new that seems interesting.
+              hmu to chat -  down to do anything and everything - and enjoy the website (try out dark mode for a cool experience)
             </p>
           </section>
         </div>
@@ -328,7 +341,7 @@ export default function App() {
         {/* Social Links */}
         <div className="mt-12 flex items-center gap-6">
           <a
-            href="https://github.com/repos?q=owner%3A%40me"
+            href="https://github.com/Omnom90?tab=repositories"
             target="_blank"
             rel="noopener noreferrer"
             className={`${isEldenRing ? 'text-gray-300 hover:text-white' : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} transition-colors`}
@@ -350,7 +363,7 @@ export default function App() {
             </svg>
           </a>
           <a
-            href="https://medium.com/@ohmkumbl"
+            href="https://ohmk.substack.com/"
             target="_blank"
             rel="noopener noreferrer"
             className={`${isEldenRing ? 'text-gray-300 hover:text-white' : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} transition-colors`}
@@ -361,7 +374,7 @@ export default function App() {
             </svg>
           </a>
           <a
-            href="https://www.tiktok.com/@ohmk0"
+            href="https://www.tiktok.com/@musicbyohm"
             target="_blank"
             rel="noopener noreferrer"
             className={`${isEldenRing ? 'text-gray-300 hover:text-white' : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} transition-colors`}
