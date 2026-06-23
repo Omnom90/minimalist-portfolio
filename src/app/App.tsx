@@ -246,7 +246,7 @@ export default function App() {
               <p>I'm also currently working on some projects. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form feedback enginge using Google's MediaPipe and LLM integration (it's done, just want better functionality) </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>In currently development of a productivity/fitness app named: Meridian. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
+              <p>In current development of a productivity/fitness app named: Meridian. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
