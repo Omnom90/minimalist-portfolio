@@ -229,7 +229,7 @@ export default function App() {
               >
                 MeaVana
               </span>
-              , Rishfits LC, Soar Bars, and Praxigen) where I've worked from software, to growth, to produminately product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
+              , Rishfits LC, Soar Bars, and Praxigen) where I've worked from software, to growth, to predominantly product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Eaton')}
@@ -243,7 +243,7 @@ export default function App() {
             <p className="text-base leading-relaxed mt-4">
               I learned most of my technical skills through coursework and projects. I have experience in DSA, OOP, ML, computer architecture, and web systems. I'm currently enrolled in computer vision, and applied AI-agents (how SWE works with AI). 
               <p className="text-base leading-relaxed mt-4"></p>
-              <p>I'm also currently working on some projects. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form feedback enginge using Google's mediapipe and LLM integration (it's done, just want better functionality) </p>
+              <p>I'm also currently working on some projects. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form feedback enginge using Google's MediaPipe and LLM integration (it's done, just want better functionality) </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
               <p>In currently development of a productivity/fitness app named: Meridian. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
