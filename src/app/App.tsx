@@ -400,7 +400,7 @@ export default function App() {
 
         {/* Social Links */}
         <div className="mt-6 flex flex-col gap-2">
-        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: June 23rd, 2026</p>
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: June 25rd, 2026</p>
         <div className="flex items-center gap-6">
           <a
             href="https://github.com/Omnom90?tab=repositories"
