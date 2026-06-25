@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import StormBackground from './components/StormBackground';
 import RainBackground from './components/RainBackground';
 import eldenRingImg from '../assets/eldenring.jpg';
+import pivyrImg from '../assets/pivyr.png';
+import soarBarImg from '../assets/soarbar.png';
 import charlesImg from '../assets/charles.jpg';
 import cadeImg from '../assets/cade.jpg';
 import authorImg from '../assets/author.jpg';
@@ -28,6 +30,8 @@ export default function App() {
 
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const clearTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const activeCompanyRef = useRef<string | null>(null);
+  const lockTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Content creator video refs & sequential playback state
   const contentCreatorVideos = [contentCreatorVideo0, contentCreatorVideo2, contentCreatorVideo1];
@@ -46,6 +50,9 @@ export default function App() {
     'Soar Bars': 'https://soarbars.com/',
     'Praxigen': 'https://praxigen.dev/',
   };
+
+  // Companies that block iframe embedding
+  const noIframeCompanies = new Set(['Eaton', 'Pivyr', 'Soar Bars']);
 
   const personalContent: Record<string, { image?: string; description?: string }> = {
     'Elden Ring': { image: eldenRingImg },
@@ -100,22 +107,46 @@ export default function App() {
   };
 
   const handleCompanyHover = (company: string | null) => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-    }
-    if (clearTimerRef.current) {
-      clearTimeout(clearTimerRef.current);
-    }
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
 
     if (company) {
+      // Any hover-in cancels the pending unlock (layout-shift grace period)
+      if (lockTimerRef.current) {
+        clearTimeout(lockTimerRef.current);
+        lockTimerRef.current = null;
+      }
+      // Locked to a different company — ignore (layout-shift artifact)
+      if (activeCompanyRef.current !== null && activeCompanyRef.current !== company) return;
+
       hoverTimerRef.current = setTimeout(() => {
+        activeCompanyRef.current = company;
         setHoverState({ company, personal: null, sports: null, author: false });
       }, 1000);
     } else {
-      clearTimerRef.current = setTimeout(() => {
-        setHoverState(prev => ({ ...prev, company: null }));
-      }, 0);
+      if (activeCompanyRef.current !== null) {
+        // Short grace period: if cursor re-enters any span within 150ms it's a layout-shift
+        // artifact and the unlock is cancelled. Genuine moves let the timer fire.
+        lockTimerRef.current = setTimeout(() => {
+          activeCompanyRef.current = null;
+          lockTimerRef.current = null;
+          setHoverState(prev => ({ ...prev, company: null }));
+        }, 150);
+      } else {
+        clearTimerRef.current = setTimeout(() => {
+          setHoverState(prev => ({ ...prev, company: null }));
+        }, 0);
+      }
     }
+  };
+
+  const handleCompanyAreaLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = null;
+    activeCompanyRef.current = null;
+    setHoverState(prev => ({ ...prev, company: null }));
   };
 
   const handlePersonalHover = (keyword: string | null) => {
@@ -215,14 +246,15 @@ export default function App() {
           {/* Experience Section */}
           <section>
             <h2 className="text-2xl mb-3 border-b border-current pb-2">Experience</h2>
-            <p className="text-base leading-relaxed">
+            <p className="text-base leading-relaxed" onMouseLeave={handleCompanyAreaLeave}>
               I have worked at multiple startups (
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Pivyr' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Pivyr')}
                 onMouseLeave={() => handleCompanyHover(null)}
+                onClick={() => window.open(companyUrls['Pivyr'], '_blank')}
               >
-                Pivyr
+                <strong>Pivyr</strong>
               </span>
               ,{' '}
               <span
@@ -230,7 +262,7 @@ export default function App() {
                 onMouseEnter={() => handleCompanyHover('MeaVana')}
                 onMouseLeave={() => handleCompanyHover(null)}
               >
-                MeaVana
+                <strong>MeaVana</strong>
               </span>
               ,{' '}
               <span
@@ -238,15 +270,16 @@ export default function App() {
                 onMouseEnter={() => handleCompanyHover('Rishfits')}
                 onMouseLeave={() => handleCompanyHover(null)}
               >
-                Rishfits
+                <strong>Rishfits</strong>
               </span>
               ,{' '}
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Soar Bars' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Soar Bars')}
                 onMouseLeave={() => handleCompanyHover(null)}
+                onClick={() => window.open(companyUrls['Soar Bars'], '_blank')}
               >
-                Soar Bars
+                <strong>Soar Bars</strong>
               </span>
               , and{' '}
               <span
@@ -254,7 +287,7 @@ export default function App() {
                 onMouseEnter={() => handleCompanyHover('Praxigen')}
                 onMouseLeave={() => handleCompanyHover(null)}
               >
-                Praxigen
+                <strong>Praxigen</strong>
               </span>
               ) working from software, to growth, to predominantly product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
@@ -263,17 +296,17 @@ export default function App() {
                 onMouseLeave={() => handleCompanyHover(null)}
                 onClick={() => window.open(companyUrls['Eaton'], '_blank')}
               >
-                Eaton
+                <strong>Eaton</strong>
               </span>{' '}
               where I'm leading GTM on a new product line, shipped a new company website, and automating a sales quote form.
             </p>
             <p className="text-base leading-relaxed mt-4">
-              I learned most of my technical skills through coursework and projects. I have experience in DSA, OOP, ML, computer architecture, and web systems. I'm currently enrolled in computer vision, and applied AI-agents (how SWE works with AI). 
+              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. I'm currently enrolled in computer vision, and applied AI-agents (how SWE works with AI). 
               <p className="text-base leading-relaxed mt-4"></p>
-              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form feedback enginge using Google's MediaPipe and LLM integration (it's done, just want better functionality) </p>
+              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form <a href="https://github.com/Omnom90/form-analyzer-WIP" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration (it's done, just want better functionality) </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>Currently developing a productivity/fitness app named: Meridian. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
+              <p>Currently developing a productivity/fitness app named: <strong>Meridian</strong>. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
@@ -311,9 +344,9 @@ export default function App() {
                   }
                 }}
               >
-                content creator
+                <strong>content creator</strong>
               </span>{' '}
-              with around 4k follower and over 4 million views. I make videos around fitness, music, and promotional deals. I want to inspire those to share their talents with the world and motivate them to strive for greatness (hit me up for any brand deals).
+              with around <strong>4k followers</strong> and over <strong>4 million views</strong>. I make videos around fitness, music, and promotional deals. I want to inspire those to share their talents with the world and motivate them to strive for greatness (hit me up for any brand deals).
   
             </p>
           </section>
@@ -328,15 +361,15 @@ export default function App() {
                 onMouseEnter={() => handlePersonalHover('Elden Ring')}
                 onMouseLeave={() => handlePersonalHover(null)}
               >
-                Elden Ring
+                <strong>Elden Ring</strong>
               </span>{' '}
-              (100% completion), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with AI pictures, and am an{' '}
+              (<strong>100% completion</strong>), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with AI pictures, and am an{' '}
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.author ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleAuthorHover(true)}
                 onMouseLeave={() => handleAuthorHover(false)}
               >
-                "author"
+                <strong>"author"</strong>
               </span>{' '}
               that loves writing about fitness and philosophy.
             </p>
@@ -347,7 +380,7 @@ export default function App() {
                 onMouseEnter={() => handleSportsHover('Charles "Do Bronx" Oliveira')}
                 onMouseLeave={() => handleSportsHover(null)}
               >
-                Charles "Do Bronx" Oliveira
+                <strong>Charles "Do Bronx" Oliveira</strong>
               </span>
               ) and NBA ball knowledge master (
               <span
@@ -355,7 +388,7 @@ export default function App() {
                 onMouseEnter={() => handleSportsHover('Cade')}
                 onMouseLeave={() => handleSportsHover(null)}
               >
-                Cade
+                <strong>Cade</strong>
               </span>{' '}
               for MVP).
             </p>
@@ -427,7 +460,7 @@ export default function App() {
       </div>
 
       {/* Company Preview Box */}
-      {hoverState.company && hoverState.company !== 'Eaton' && (
+      {hoverState.company && !noIframeCompanies.has(hoverState.company) && (
         <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
           <iframe
             src={companyUrls[hoverState.company]}
@@ -437,10 +470,21 @@ export default function App() {
         </div>
       )}
 
-      {/* Eaton small text box */}
+      {/* Screenshot previews for no-iframe companies */}
+      {hoverState.company === 'Pivyr' && (
+        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+          <img src={pivyrImg} alt="Pivyr" className="size-full object-cover object-top" />
+        </div>
+      )}
+      {hoverState.company === 'Soar Bars' && (
+        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+          <img src={soarBarImg} alt="Soar Bars" className="size-full object-cover" />
+        </div>
+      )}
+      {/* Eaton: no screenshot, keep text fallback */}
       {hoverState.company === 'Eaton' && (
         <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[220px] bg-white text-black rounded-lg shadow-2xl border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none p-4">
-          <p className="text-sm text-gray-600 text-center">Sry, this preview doesn't work, left click to get taken to the company's website</p>
+          <p className="text-sm text-gray-600 text-center">Preview not available — left click to visit the site</p>
         </div>
       )}
 
