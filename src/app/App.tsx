@@ -10,7 +10,7 @@ import authorImg from '../assets/author.jpg';
 import contentCreatorVideo0 from '../assets/content-creator.mp4';
 import contentCreatorVideo1 from '../assets/content-creator-1.mp4';
 import contentCreatorVideo2 from '../assets/content-creator-2.mp4';
-import { SpeedInsights } from "@vercel/speed-insights/next"
+//import { SpeedInsights } from "@vercel/speed-insights/next"
 
 interface HoverState {
   company: string | null;
