@@ -10,6 +10,7 @@ import authorImg from '../assets/author.jpg';
 import contentCreatorVideo0 from '../assets/content-creator.mp4';
 import contentCreatorVideo1 from '../assets/content-creator-1.mp4';
 import contentCreatorVideo2 from '../assets/content-creator-2.mp4';
+import minecraft from '../assets/minecraft.png';
 //import { SpeedInsights } from "@vercel/speed-insights/next"
 
 interface HoverState {
@@ -17,6 +18,7 @@ interface HoverState {
   personal: string | null;
   sports: string | null;
   author: boolean;
+  aiPictures: boolean;
 }
 
 export default function App() {
@@ -25,6 +27,7 @@ export default function App() {
     personal: null,
     sports: null,
     author: false,
+    aiPictures: false,
   });
 
   const [darkMode, setDarkMode] = useState(false);
@@ -122,7 +125,7 @@ export default function App() {
 
       hoverTimerRef.current = setTimeout(() => {
         activeCompanyRef.current = company;
-        setHoverState({ company, personal: null, sports: null, author: false });
+        setHoverState({ company, personal: null, sports: null, author: false, aiPictures: false });
       }, 1000);
     } else {
       if (activeCompanyRef.current !== null) {
@@ -160,9 +163,9 @@ export default function App() {
 
     // Instant transition for personal items
     if (keyword) {
-      setHoverState({ company: null, personal: keyword, sports: null, author: false });
+      setHoverState({ company: null, personal: keyword, sports: null, author: false, aiPictures: false });
     } else {
-      setHoverState({ company: null, personal: null, sports: null, author: false });
+      setHoverState({ company: null, personal: null, sports: null, author: false, aiPictures: false });
     }
   };
 
@@ -176,7 +179,7 @@ export default function App() {
 
     if (keyword) {
       hoverTimerRef.current = setTimeout(() => {
-        setHoverState({ company: null, personal: null, sports: keyword, author: false });
+        setHoverState({ company: null, personal: null, sports: keyword, author: false, aiPictures: false });
       }, 1000);
     } else {
       clearTimerRef.current = setTimeout(() => {
@@ -195,11 +198,30 @@ export default function App() {
 
     if (hovering) {
       hoverTimerRef.current = setTimeout(() => {
-        setHoverState({ company: null, personal: null, sports: null, author: true });
+        setHoverState({ company: null, personal: null, sports: null, author: true, aiPictures: false });
       }, 1000);
     } else {
       clearTimerRef.current = setTimeout(() => {
         setHoverState(prev => ({ ...prev, author: false }));
+      }, 0);
+    }
+  };
+
+  const handleAiPicturesHover = (hovering: boolean) => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+    if (clearTimerRef.current) {
+      clearTimeout(clearTimerRef.current);
+    }
+
+    if (hovering) {
+      hoverTimerRef.current = setTimeout(() => {
+        setHoverState({ company: null, personal: null, sports: null, author: false, aiPictures: true });
+      }, 1000);
+    } else {
+      clearTimerRef.current = setTimeout(() => {
+        setHoverState(prev => ({ ...prev, aiPictures: false }));
       }, 0);
     }
   };
@@ -224,7 +246,7 @@ export default function App() {
       )}
 
       <div
-        className={`relative z-10 w-full max-w-4xl px-8 pt-4 pb-8 transition-all duration-300 ${(hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.author ? 'mr-[420px]' : ''
+        className={`relative z-10 w-full max-w-4xl px-8 pt-4 pb-8 transition-all duration-300 ${(hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.author || hoverState.aiPictures ? 'mr-[420px]' : ''
           } ${isEldenRing ? 'text-white' : ''}`}
       >
         {/* Header */}
@@ -290,7 +312,7 @@ export default function App() {
               >
                 <strong>Praxigen</strong>
               </span>
-              ) working from software, to growth, to predominantly product, learning how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
+              ) working software, growth, and predominantly product. Learned how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Eaton')}
@@ -302,12 +324,12 @@ export default function App() {
               where I'm leading GTM on a new product line, shipped a new company website, and automating a sales quote form.
             </p>
             <p className="text-base leading-relaxed mt-4">
-              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. I'm currently enrolled in computer vision, and applied AI-agents (how SWE works with AI). 
+              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. I'm currently enrolled in computer vision, and applied AI-agents for the upcoming semester. 
               <p className="text-base leading-relaxed mt-4"></p>
-              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. Developing a computer vision based exercise form <a href="https://github.com/Omnom90/form-analyzer-WIP" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration (it's done, just want better functionality) </p>
+              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. I deployed an exercise form <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration, and am now scaling. </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>Currently developing a productivity/fitness app named: <strong>Meridian</strong>. Can't speak too much right now, but expect alpha testing soon... (p.s. repos will be linked as soon as both projects are finished).</p>
+              <p>I'm in the final stages of shipping a productivity/fitness iOS app named: <strong>Meridian</strong>. Expect more info and alpha launch soon...</p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
@@ -347,7 +369,7 @@ export default function App() {
               >
                 <strong>content creator</strong>
               </span>{' '}
-              with around <strong>4k followers</strong> and over <strong>4 million views</strong>. I make videos around fitness, music, and promotional deals. I want to inspire those to share their talents with the world and motivate them to strive for greatness (hit me up for any brand deals).
+              with around <strong>5k followers</strong> and over <strong>4 million views</strong>. I produce videos focused on fitness and music. I want to inspire people to share their talents and motivate them to strive for greatness (hit me up for any brand deals)
   
             </p>
           </section>
@@ -364,7 +386,15 @@ export default function App() {
               >
                 <strong>Elden Ring</strong>
               </span>{' '}
-              (<strong>100% completion</strong>), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with AI pictures, and am an{' '}
+              (<strong>100% completion</strong>), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with{' '}
+              <span
+                className={`cursor-pointer transition-colors underline relative ${hoverState.aiPictures ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
+                onMouseEnter={() => handleAiPicturesHover(true)}
+                onMouseLeave={() => handleAiPicturesHover(false)}
+              >
+                <strong>AI pictures</strong>
+              </span>
+              , and am an{' '}
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.author ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleAuthorHover(true)}
@@ -401,7 +431,7 @@ export default function App() {
 
         {/* Social Links */}
         <div className="mt-6 flex flex-col gap-2">
-        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: June 25rd, 2026</p>
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: July 17th, 2026</p>
         <div className="flex items-center gap-6">
           <a
             href="https://github.com/Omnom90?tab=repositories"
@@ -550,6 +580,17 @@ export default function App() {
           <img
             src={authorImg}
             alt="Medium articles"
+            className="size-full object-cover"
+          />
+        </div>
+      )}
+
+      {/* AI Pictures Preview Box */}
+      {hoverState.aiPictures && (
+        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+          <img
+            src={minecraft}
+            alt="AI generated picture"
             className="size-full object-cover"
           />
         </div>
