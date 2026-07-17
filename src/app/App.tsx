@@ -52,7 +52,7 @@ export default function App() {
     'MeaVana': 'https://www.meavana.com',
     'Rishfits': 'https://rishfits.ptflow.io/',
     'Soar Bars': 'https://soarbars.com/',
-    'Praxigen': 'https://praxigen.dev/',
+    //'Praxigen': 'https://praxigen.dev/',
   };
 
   // Companies that block iframe embedding
@@ -295,7 +295,7 @@ export default function App() {
               >
                 <strong>Rishfits</strong>
               </span>
-              ,{' '}
+              , and{' '}
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Soar Bars' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Soar Bars')}
@@ -304,14 +304,13 @@ export default function App() {
               >
                 <strong>Soar Bars</strong>
               </span>
-              , and{' '}
-              <span
+              {/* <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Praxigen' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handleCompanyHover('Praxigen')}
                 onMouseLeave={() => handleCompanyHover(null)}
               >
                 <strong>Praxigen</strong>
-              </span>
+              </span> */}
               ) working software, growth, and predominantly product. Learned how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
