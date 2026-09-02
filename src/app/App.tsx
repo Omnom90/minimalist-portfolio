@@ -332,12 +332,12 @@ export default function App() {
               , and automated a sales quote form.
             </p>
             <p className="text-base leading-relaxed mt-4">
-              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. I'm currently enrolled in computer vision, and applied AI-agents for the upcoming semester. 
+              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. All of my growth/product experience came from personal projects. 
               <p className="text-base leading-relaxed mt-4"></p>
-              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. I deployed an exercise form <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration, and am now scaling. </p>
+              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. I deployed an exercise form <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration, and scaled it to over 300 users in the first month. </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>I'm in the final stages of shipping a productivity/fitness iOS app named: <a href="https://meridianscreentime.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Meridian</strong></a>. Expect more info and alpha launch soon...</p>
+              <p>I'm in the final stages of shipping a productivity/fitness iOS app named <a href="https://meridianscreentime.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Meridian</strong></a> — sign up for the launch.</p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
