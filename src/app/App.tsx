@@ -320,7 +320,16 @@ export default function App() {
               >
                 <strong>Eaton</strong>
               </span>{' '}
-              where I'm leading GTM on a new product line, shipped a new company website, and automating a sales quote form.
+              where I led GTM on a new product line, shipped a{' '}
+              <a
+                href="https://www.eatongreatlakes.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-red-500 transition-colors"
+              >
+                <strong>new company website</strong>
+              </a>
+              , and automated a sales quote form.
             </p>
             <p className="text-base leading-relaxed mt-4">
               I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. I'm currently enrolled in computer vision, and applied AI-agents for the upcoming semester. 
@@ -328,7 +337,7 @@ export default function App() {
               <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. I deployed an exercise form <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration, and am now scaling. </p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>I'm in the final stages of shipping a productivity/fitness iOS app named: <strong>Meridian</strong>. Expect more info and alpha launch soon...</p>
+              <p>I'm in the final stages of shipping a productivity/fitness iOS app named: <a href="https://meridianscreentime.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Meridian</strong></a>. Expect more info and alpha launch soon...</p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
@@ -368,7 +377,7 @@ export default function App() {
               >
                 <strong>content creator</strong>
               </span>{' '}
-              with around <strong>5k followers</strong> and over <strong>4 million views</strong>. I produce videos focused on fitness and music. I want to inspire people to share their talents and motivate them to strive for greatness (hit me up for any brand deals)
+              with around <strong>7k followers</strong> and over <strong>7 million views</strong>. I produce videos focused on fitness and music. I want to inspire people to share their talents and motivate them to strive for greatness (hit me up for any brand deals)
   
             </p>
           </section>
@@ -430,7 +439,7 @@ export default function App() {
 
         {/* Social Links */}
         <div className="mt-6 flex flex-col gap-2">
-        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: July 17th, 2026</p>
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: September 2nd, 2026</p>
         <div className="flex items-center gap-6">
           <a
             href="https://github.com/Omnom90?tab=repositories"
