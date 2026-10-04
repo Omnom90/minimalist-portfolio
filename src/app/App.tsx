@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import StormBackground from './components/StormBackground';
 import RainBackground from './components/RainBackground';
 import eldenRingImg from '../assets/eldenring.jpg';
@@ -6,10 +6,10 @@ import pivyrImg from '../assets/pivyr.png';
 import soarBarImg from '../assets/soarbar.png';
 import charlesImg from '../assets/charles.jpg';
 import cadeImg from '../assets/cade.jpg';
-import authorImg from '../assets/author.jpg';
-import contentCreatorVideo0 from '../assets/content-creator.mp4';
-import contentCreatorVideo1 from '../assets/content-creator-1.mp4';
-import contentCreatorVideo2 from '../assets/content-creator-2.mp4';
+import authorImg from '../assets/substack.jpg';
+import musicVideo from '../assets/new_song.mp4';
+import musicProfImg from '../assets/music_prof.jpg';
+import musicViewsImg from '../assets/music_views.jpg';
 import minecraft from '../assets/minecraft.png';
 //import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -37,13 +37,14 @@ export default function App() {
   const activeCompanyRef = useRef<string | null>(null);
   const lockTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Content creator video refs & sequential playback state
-  const contentCreatorVideos = [contentCreatorVideo0, contentCreatorVideo2, contentCreatorVideo1];
-  const videoRef0 = useRef<HTMLVideoElement | null>(null);
-  const videoRef1 = useRef<HTMLVideoElement | null>(null);
-  const videoRef2 = useRef<HTMLVideoElement | null>(null);
-  const videoRefs = [videoRef0, videoRef1, videoRef2];
-  const [activeVideoIndex, setActiveVideoIndex] = useState(-1);
+  // Content creator music video: loops while hovered
+  const musicVideoRef = useRef<HTMLVideoElement | null>(null);
+  // Main text column — the rain measures it so the heavy edge rain stays beside the text
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  // "writing" (Substack) hover — see handleAuthorHover
+  const authorSpanRef = useRef<HTMLSpanElement | null>(null);
+  const authorAnchorRef = useRef<{ x: number; y: number } | null>(null);
+  const lastMouseRef = useRef<{ x: number; y: number } | null>(null);
   const isContentCreator = hoverState.personal === 'content creator';
 
   const companyUrls: Record<string, string> = {
@@ -62,42 +63,25 @@ export default function App() {
     'Elden Ring': { image: eldenRingImg },
   };
 
-  // Sequential video playback: when content creator is hovered, start video 0
+  // Play the music video on loop while content creator is hovered
   useEffect(() => {
-    if (isContentCreator) {
-      setActiveVideoIndex(0);
-    } else {
-      setActiveVideoIndex(-1);
-      // Pause and reset all videos when hover ends
-      videoRefs.forEach(ref => {
-        if (ref.current) {
-          ref.current.pause();
-          ref.current.currentTime = 0;
-        }
-      });
-    }
-  }, [isContentCreator]);
-
-  // When activeVideoIndex changes, pause previous and play new video
-  useEffect(() => {
-    if (activeVideoIndex < 0 || activeVideoIndex > 2) return;
-    // Pause all other videos (don't reset their time)
-    videoRefs.forEach((ref, i) => {
-      if (i !== activeVideoIndex && ref.current) {
-        ref.current.pause();
-      }
-    });
-    const videoEl = videoRefs[activeVideoIndex]?.current;
-    if (videoEl) {
-      videoEl.currentTime = 0;
+    const videoEl = musicVideoRef.current;
+    if (!isContentCreator || !videoEl) return;
+    let cancelled = false;
+    videoEl.currentTime = 0;
+    videoEl.muted = false;
+    // Browsers may block unmuted autoplay before any user interaction — fall back to muted.
+    // Only on NotAllowedError: an AbortError just means we paused it (hover ended / StrictMode).
+    videoEl.play().catch((err: DOMException) => {
+      if (cancelled || err.name !== 'NotAllowedError') return;
+      videoEl.muted = true;
       videoEl.play().catch(() => { });
-    }
-  }, [activeVideoIndex]);
-
-  // Called when a video ends — just stop, don't auto-advance
-  const handleVideoEnded = useCallback((_index: number) => {
-    // Do nothing — user clicks to advance
-  }, []);
+    });
+    return () => {
+      cancelled = true;
+      videoEl.pause();
+    };
+  }, [isContentCreator]);
 
   const sportsContent: Record<string, { image: string; description: string }> = {
     'Charles "Do Bronx" Oliveira': {
@@ -198,14 +182,35 @@ export default function App() {
 
     if (hovering) {
       hoverTimerRef.current = setTimeout(() => {
+        authorAnchorRef.current = lastMouseRef.current;
         setHoverState({ company: null, personal: null, sports: null, author: true, aiPictures: false });
       }, 1000);
-    } else {
+    } else if (!hoverState.author) {
+      // Once open, closing is handled by the mousemove listener below — the text rewraps when
+      // it shifts left, so a mouseleave here usually means the word moved, not the cursor.
       clearTimerRef.current = setTimeout(() => {
         setHoverState(prev => ({ ...prev, author: false }));
       }, 0);
     }
   };
+
+  // While the author preview is open, close it only once the cursor has really moved away
+  useEffect(() => {
+    if (!hoverState.author) return;
+    const onMove = (e: MouseEvent) => {
+      const pos = { x: e.clientX, y: e.clientY };
+      if (authorSpanRef.current?.contains(e.target as Node)) {
+        authorAnchorRef.current = pos;
+        return;
+      }
+      const anchor = authorAnchorRef.current;
+      if (!anchor || Math.hypot(pos.x - anchor.x, pos.y - anchor.y) > 40) {
+        setHoverState(prev => ({ ...prev, author: false }));
+      }
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [hoverState.author]);
 
   const handleAiPicturesHover = (hovering: boolean) => {
     if (hoverTimerRef.current) {
@@ -227,13 +232,15 @@ export default function App() {
   };
 
   const isEldenRing = hoverState.personal === 'Elden Ring';
+  // Hover preview borders: black in light mode, white in dark mode
+  const previewBorder = darkMode ? 'border-white' : 'border-black';
 
   return (
     <div className={`relative min-h-screen w-full overflow-hidden flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#11111f] text-white' : 'bg-white text-black'}`}>
       {/* Storm background in dark mode */}
       {darkMode && <StormBackground />}
       {/* Rain texture in light mode */}
-      {!darkMode && <RainBackground />}
+      {!darkMode && <RainBackground contentRef={contentRef} />}
       {/* Background overlay when hovering personal items */}
       {hoverState.personal && personalContent[hoverState.personal] && personalContent[hoverState.personal].image && (
         <div className="absolute inset-0 z-0 transition-opacity duration-700">
@@ -246,11 +253,12 @@ export default function App() {
       )}
 
       <div
-        className={`relative z-10 w-full max-w-4xl px-8 pt-4 pb-8 transition-all duration-300 ${(hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.author || hoverState.aiPictures ? 'mr-[420px]' : ''
+        ref={contentRef}
+        className={`relative z-10 w-full max-w-4xl px-8 pt-4 pb-8 transition-all duration-300 ${hoverState.author ? 'mr-[640px]' : (hoverState.company && hoverState.company !== 'Eaton') || hoverState.sports || hoverState.aiPictures || isContentCreator ? 'mr-[420px]' : ''
           } ${isEldenRing ? 'text-white' : ''}`}
       >
         {/* Header */}
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <div>
             <h1 className="text-5xl mb-2">Ohm Kumblekere</h1>
             <p className={`text-lg ${isEldenRing ? 'text-gray-200' : darkMode ? 'text-gray-400' : 'text-gray-600'} transition-colors duration-700`}>Product · Engineering · Creation · Try hovering or clicking your cursor over underlined words</p>
@@ -269,75 +277,16 @@ export default function App() {
           {/* Experience Section */}
           <section>
             <h2 className="text-2xl mb-3 border-b border-current pb-2">Experience</h2>
-            <p className="text-base leading-relaxed" onMouseLeave={handleCompanyAreaLeave}>
-              I have worked at multiple startups (
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Pivyr' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('Pivyr')}
-                onMouseLeave={() => handleCompanyHover(null)}
-                onClick={() => window.open(companyUrls['Pivyr'], '_blank')}
-              >
-                <strong>Pivyr</strong>
-              </span>
-              ,{' '}
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'MeaVana' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('MeaVana')}
-                onMouseLeave={() => handleCompanyHover(null)}
-              >
-                <strong>MeaVana</strong>
-              </span>
-              ,{' '}
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Rishfits' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('Rishfits')}
-                onMouseLeave={() => handleCompanyHover(null)}
-              >
-                <strong>Rishfits</strong>
-              </span>
-              , and{' '}
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Soar Bars' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('Soar Bars')}
-                onMouseLeave={() => handleCompanyHover(null)}
-                onClick={() => window.open(companyUrls['Soar Bars'], '_blank')}
-              >
-                <strong>Soar Bars</strong>
-              </span>
-              {/* <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Praxigen' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('Praxigen')}
-                onMouseLeave={() => handleCompanyHover(null)}
-              >
-                <strong>Praxigen</strong>
-              </span> */}
-              ) working software, growth, and predominantly product. Learned how to discover, execute, and ship features based on KPIs and user testing. I'm also a tech sales intern @
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.company === 'Eaton' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleCompanyHover('Eaton')}
-                onMouseLeave={() => handleCompanyHover(null)}
-                onClick={() => window.open(companyUrls['Eaton'], '_blank')}
-              >
-                <strong>Eaton</strong>
-              </span>{' '}
-              where I led GTM on a new product line, shipped a{' '}
-              <a
-                href="https://www.eatongreatlakes.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-red-500 transition-colors"
-              >
-                <strong>new company website</strong>
-              </a>
-              , and automated a sales quote form.
+            <p className="text-base leading-relaxed">
+              I've worked at various startups working on software, growth, and product. Over the summer I worked as a technical sales and developer intern @ <strong>Eaton</strong>. Interested in PM, GTM, or Growth roles in consumer-focused areas (open to anything tho)
             </p>
             <p className="text-base leading-relaxed mt-4">
-              I learned most of my technical skills through coursework and projects. I have experience in <strong>DSA, OOP, ML</strong>, computer architecture, and <strong>web systems</strong>. All of my growth/product experience came from personal projects. 
+              I picked up most of my technical skills through coursework and projects from the University of Michigan (Go Blue!!!). You can find these courses on my <a href="https://www.linkedin.com/in/ohmkumblekere/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>LinkedIn</strong></a>. All of my growth/product experience came from personal projects
               <p className="text-base leading-relaxed mt-4"></p>
-              <p>I've been working on some projects recently. One is this website, which is a constant work-in-progress. I deployed an exercise form <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>feedback engine</strong></a> using Google's MediaPipe and LLM integration, and scaled it to over 300 users in the first month. </p>
+              <p>Some of those personal projects were this website, which is a constant work in progress. More predominantly, I made <a href="https://join-formly.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Formly</strong></a>, an exercise form feedback web app using Google's MediaPipe and LLM integration, and scaled it to over 500 users in under 2 weeks</p>
               <p className="text-base leading-relaxed mt-4"></p>
 
-              <p>I'm in the final stages of shipping a productivity/fitness iOS app named <a href="https://meridianscreentime.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Meridian</strong></a> — sign up for the launch.</p>
+              <p>Over the summer, I found a systemic problem with the idea of "locking in" and set out to solve it. Wasting time, our only truly finite resource, felt ridiculous, and I wanted to help people (myself included) get past it, so I shipped <a href="https://meridianscreentime.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>Meridian</strong></a> — go check it out on the App Store. I also documented my process and some takeaways <a href="https://ohmk.substack.com/p/locking-in-is-mostly-just-doomscrolling" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-500 transition-colors"><strong>here</strong></a></p>
               {/* Some of those include an{' '}
               <a
                 href="https://github.com/Omnom90?tab=repositories"
@@ -364,29 +313,18 @@ export default function App() {
                 className={`cursor-pointer transition-colors underline relative ${hoverState.personal === 'content creator' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handlePersonalHover('content creator')}
                 onMouseLeave={() => handlePersonalHover(null)}
-                onClick={() => {
-                  if (isContentCreator) {
-                    // Pause current video, advance to next
-                    const currentRef = videoRefs[activeVideoIndex]?.current;
-                    if (currentRef) {
-                      currentRef.pause();
-                    }
-                    setActiveVideoIndex(prev => (prev + 1) % 3);
-                  }
-                }}
               >
                 <strong>content creator</strong>
               </span>{' '}
-              with around <strong>7k followers</strong> and over <strong>7 million views</strong>. I produce videos focused on fitness and music. I want to inspire people to share their talents and motivate them to strive for greatness (hit me up for any brand deals)
-  
+              with around <strong>7k followers</strong> and over <strong>1 million likes</strong> focused in fitness and music. Everything I post comes from what I've been through, made for whoever needs a push to start, a hand to keep improving, or a reason to keep going
             </p>
           </section>
 
           {/* Myself Section */}
-          <section>
+          <section className="!mt-2">
             <h2 className="text-2xl mb-3 border-b border-current pb-2">Myself</h2>
             <p className="text-base leading-relaxed">
-              In my free time, I have beaten the game{' '}
+              A mentor once told me you can only be good at so many things, so in my free time I try to find where that limit is. I work on myself through bodybuilding and powerlifting, embrace my music side as a drummer in a band on campus, keep my mind occupied with video games (
               <span
                 className={`cursor-pointer transition-colors underline relative ${hoverState.personal === 'Elden Ring' ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
                 onMouseEnter={() => handlePersonalHover('Elden Ring')}
@@ -394,23 +332,16 @@ export default function App() {
               >
                 <strong>Elden Ring</strong>
               </span>{' '}
-              (<strong>100% completion</strong>), love to workout (powerlifting & bodybuilding comp soon), joined a band recently, mess around with{' '}
+              <strong>100%</strong> btw), and explore philosophy through{' '}
               <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.aiPictures ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleAiPicturesHover(true)}
-                onMouseLeave={() => handleAiPicturesHover(false)}
-              >
-                <strong>AI pictures</strong>
-              </span>
-              , and am an{' '}
-              <span
-                className={`cursor-pointer transition-colors underline relative ${hoverState.author ? 'text-red-500 after:absolute after:inset-y-0 after:left-full after:w-[420px] after:content-[\'\']' : 'hover:text-red-500'}`}
-                onMouseEnter={() => handleAuthorHover(true)}
+                ref={authorSpanRef}
+                className={`cursor-pointer transition-colors underline ${hoverState.author ? 'text-red-500' : 'hover:text-red-500'}`}
+                onMouseEnter={e => { lastMouseRef.current = { x: e.clientX, y: e.clientY }; handleAuthorHover(true); }}
                 onMouseLeave={() => handleAuthorHover(false)}
+                onMouseMove={e => { lastMouseRef.current = { x: e.clientX, y: e.clientY }; }}
               >
-                <strong>"author"</strong>
-              </span>{' '}
-              that loves writing about fitness and philosophy.
+                <strong>writing</strong>
+              </span>
             </p>
             <p className="text-base leading-relaxed mt-4">
               Also a huge sports fan especially with UFC (
@@ -438,8 +369,8 @@ export default function App() {
         </div>
 
         {/* Social Links */}
-        <div className="mt-6 flex flex-col gap-2">
-        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: September 2nd, 2026</p>
+        <div className="mt-3 flex flex-col gap-2">
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Last Updated: October 4th, 2026</p>
         <div className="flex items-center gap-6">
           <a
             href="https://github.com/Omnom90?tab=repositories"
@@ -500,7 +431,7 @@ export default function App() {
 
       {/* Company Preview Box */}
       {hoverState.company && !noIframeCompanies.has(hoverState.company) && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <iframe
             src={companyUrls[hoverState.company]}
             className="size-full"
@@ -511,64 +442,48 @@ export default function App() {
 
       {/* Screenshot previews for no-iframe companies */}
       {hoverState.company === 'Pivyr' && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[500px] rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <img src={pivyrImg} alt="Pivyr" className="size-full object-cover object-top" />
         </div>
       )}
       {hoverState.company === 'Soar Bars' && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <img src={soarBarImg} alt="Soar Bars" className="size-full object-cover" />
         </div>
       )}
       {/* Eaton: no screenshot, keep text fallback */}
       {hoverState.company === 'Eaton' && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[220px] bg-white text-black rounded-lg shadow-2xl border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none p-4">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[220px] bg-white text-black rounded-lg shadow-2xl border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none p-4`}>
           <p className="text-sm text-gray-600 text-center">Preview not available — left click to visit the site</p>
         </div>
       )}
 
-      {/* Video Preview Boxes (Content Creator) — 3 videos: left, center, right */}
+      {/* Content Creator preview — music video on top, profile + stats side by side below */}
       {isContentCreator && (
-        <>
-          {/* Left video */}
-          <div className="fixed left-6 top-1/2 -translate-y-1/2 w-[280px] bg-black rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] h-[92vh] flex flex-col gap-3 transition-all duration-300 z-50 pointer-events-none">
+          <div className={`mx-auto h-[56%] aspect-[9/16] bg-black rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder}`}>
             <video
-              ref={videoRef0}
-              src={contentCreatorVideos[0]}
-              muted={activeVideoIndex !== 0}
+              ref={musicVideoRef}
+              src={musicVideo}
+              loop
               playsInline
-              onEnded={() => handleVideoEnded(0)}
-              className="w-full h-auto object-cover"
+              className="size-full object-cover"
             />
           </div>
-          {/* Center video */}
-          <div className="fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[280px] bg-black rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
-            <video
-              ref={videoRef1}
-              src={contentCreatorVideos[1]}
-              muted={activeVideoIndex !== 1}
-              playsInline
-              onEnded={() => handleVideoEnded(1)}
-              className="w-full h-auto object-cover"
-            />
+          <div className="flex-1 min-h-0 flex gap-3">
+            <div className={`flex-1 bg-black rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder}`}>
+              <img src={musicProfImg} alt="Music profile" className="size-full object-cover object-top" />
+            </div>
+            <div className={`flex-1 bg-black rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder}`}>
+              <img src={musicViewsImg} alt="Music stats" className="size-full object-cover object-top" />
+            </div>
           </div>
-          {/* Right video */}
-          <div className="fixed right-6 top-1/2 -translate-y-1/2 w-[280px] bg-black rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
-            <video
-              ref={videoRef2}
-              src={contentCreatorVideos[2]}
-              muted={activeVideoIndex !== 2}
-              playsInline
-              onEnded={() => handleVideoEnded(2)}
-              className="w-full h-auto object-cover"
-            />
-          </div>
-        </>
+        </div>
       )}
 
       {/* Sports Info Box */}
       {hoverState.sports && sportsContent[hoverState.sports] && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white text-black rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white text-black rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <img
             src={sportsContent[hoverState.sports].image}
             alt={hoverState.sports}
@@ -584,7 +499,7 @@ export default function App() {
 
       {/* Author Preview Box */}
       {hoverState.author && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[600px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <img
             src={authorImg}
             alt="Medium articles"
@@ -595,7 +510,7 @@ export default function App() {
 
       {/* AI Pictures Preview Box */}
       {hoverState.aiPictures && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 border-red-500 transition-all duration-300 z-50 pointer-events-none">
+        <div className={`fixed right-8 top-1/2 -translate-y-1/2 w-[400px] bg-white rounded-lg shadow-2xl overflow-hidden border-2 ${previewBorder} transition-all duration-300 z-50 pointer-events-none`}>
           <img
             src={minecraft}
             alt="AI generated picture"
